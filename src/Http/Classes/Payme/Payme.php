@@ -2,6 +2,7 @@
 
 namespace Goodoneuz\PayUz\Http\Classes\Payme;
 
+use Carbon\Carbon;
 use Goodoneuz\PayUz\Http\Classes\BaseGateway;
 use Goodoneuz\PayUz\Http\Classes\DataFormat;
 use Goodoneuz\PayUz\Http\Classes\PaymentException;
@@ -424,8 +425,8 @@ class Payme extends BaseGateway
 
     public function getReport($from_date, $to_date)
     {
-        $from_date = DataFormat::timestamp2datetime($from_date);
-        $to_date = DataFormat::timestamp2datetime($to_date);
+
+        $to_date = Carbon::parse((int) $to_date / 1000)->format("Y-m-d H:i:s"); 
 
         $transactions = Transaction::where('payment_system', PaymentSystem::PAYME)
             ->where('state', Transaction::STATE_COMPLETED)
@@ -433,7 +434,7 @@ class Payme extends BaseGateway
             ->where('created_at', '<=', $to_date)->get();
         // assume, here we have $rows variable that is populated with transactions from data store
         // normalize data for response
-        $result = [];
+      $result = [];
         foreach ($transactions as $row) {
             $detail = $row['detail'];
 
@@ -445,12 +446,12 @@ class Payme extends BaseGateway
                     "{$this->config['key']}" => 1 * $row[$this->config['key']], // account parameters to identify client/order/service
                     // ... additional parameters may be listed here, which are belongs to the account
                 ],
-                'create_time' => DataFormat::datetime2timestamp($detail['create_time']),
-                'perform_time' => DataFormat::datetime2timestamp($detail['perform_time']),
-                'cancel_time' => DataFormat::datetime2timestamp($detail['cancel_time']),
+                'create_time' => $detail['create_time'],
+                'perform_time' => $detail['perform_time'],
+                'cancel_time' => $detail['cancel_time'] ?? 0,
                 'transaction' => (string)$row['id'],
-                'state' => 1 * $row['state'],
-                'reason' => isset($row['comment']) ? 1 * $row['comment'] : null,
+                'state' => $row['state'],
+                'reason' => isset($row['comment']) ? is_string($row['comment']) ? null : $row['comment'] : null,
                 'receivers' => isset($row['receivers']) ? json_decode($row['receivers'], true) : null,
             ];
         }
