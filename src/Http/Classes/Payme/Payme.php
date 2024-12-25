@@ -426,6 +426,7 @@ class Payme extends BaseGateway
     public function getReport($from_date, $to_date)
     {
 
+        $from_date = Carbon::parse((int) $from_date / 1000)->format("Y-m-d H:i:s");
         $to_date = Carbon::parse((int) $to_date / 1000)->format("Y-m-d H:i:s"); 
 
         $transactions = Transaction::where('payment_system', PaymentSystem::PAYME)
