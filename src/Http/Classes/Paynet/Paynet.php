@@ -78,7 +78,7 @@ class Paynet extends BaseGateway
                 "<providerTrnId>" . $this->request->params['transactionId'] . "</providerTrnId>" .
                 "</ns2:PerformTransactionResult>";
 
-        $model = PaymentService::convertKeyToModel($this->request->params['key']);
+        $model = PaymentService::convertKeyToModel($this->request->params['transaction_id']);
 
         // TODO: check if user not found return status 302;
 
@@ -186,7 +186,7 @@ class Paynet extends BaseGateway
 
     private function GetInformation()
     {
-        $model = PaymentService::convertKeyToModel($this->request->params['key']);
+        $model = PaymentService::convertKeyToModel($this->request->params['transaction_id']);
 
         if ($model) {
             return  "<ns2:GetInformationResult xmlns:ns2=\"http://uws.provider.com/\">" .
