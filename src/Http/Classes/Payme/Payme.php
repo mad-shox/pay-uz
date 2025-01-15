@@ -74,7 +74,7 @@ class Payme extends BaseGateway
     {
         $this->validateParams($this->request->params);
 
-        $model = PaymentService::convertKeyToModel($this->request->params['account'][$this->config['transaction_id']]);
+        $model = PaymentService::convertKeyToModel($this->request->params['account'][$this->config['key']]);
         if ($model == null) {
             $this->response->error(
                 Response::ERROR_INVALID_ACCOUNT,
@@ -114,11 +114,11 @@ class Payme extends BaseGateway
         }
 
         // assume, we should have order_id
-        if (!isset($params['account'][$this->config['transaction_id']])) {
+        if (!isset($params['account'][$this->config['key']])) {
             $this->response->error(
                 Response::ERROR_INVALID_ACCOUNT,
                 Response::message('Неверный код Счет.', 'Billing kodida xatolik.', 'Incorrect object code.'),
-                'transaction_id'
+                'key'
             );
         }
 
@@ -166,7 +166,7 @@ class Payme extends BaseGateway
     {
 
         $this->validateParams($this->request->params);
-        $model = PaymentService::convertKeyToModel($this->request->params['account'][$this->config['transaction_id']]);
+        $model = PaymentService::convertKeyToModel($this->request->params['account'][$this->config['key']]);
         //todo alert if model is null
         $transaction = $this->findTransactionByParams($this->request->params);
         if ($transaction) {
@@ -444,7 +444,7 @@ class Payme extends BaseGateway
                 'time' => 1 * $detail['system_time_datetime'], // paycom transaction timestamp as is
                 'amount' => 1 * $row['amount'],
                 'account' => [
-                    "{$this->config['transaction_id']}" => 1 * $row[$this->config['transaction_id']], // account parameters to identify client/order/service
+                    "{$this->config['key']}" => 1 * $row[$this->config['key']], // account parameters to identify client/order/service
                     // ... additional parameters may be listed here, which are belongs to the account
                 ],
                 'create_time' => $detail['create_time'],
@@ -465,7 +465,7 @@ class Payme extends BaseGateway
         $params = [
             'merchant' => $this->config['merchant_id'],
             'amount' => $amount * 100,
-            'account[' . $this->config['transaction_id'] . ']' => PaymentService::convertModelToKey($model),
+            'account[' . $this->config['key'] . ']' => PaymentService::convertModelToKey($model),
             'lang' => 'ru',
             'currency' => $currency,
             'callback' => $url,
